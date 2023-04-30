@@ -1,0 +1,26 @@
+
+body {
+    background: gray;
+}
+
+#game_area {
+    margin:0 auto;
+    top:15%;
+    left:25%;
+    position: absolute;
+    width:1000px;
+    height:600px;
+    background: #EDE4CC;
+    outline:7px groove greenyellow;
+}
+
+#time_bar{
+    background: white;
+    width:100%;
+    height:5%;
+}
+
+#player{
+    height: 100px;
+    position: absolute;
+}
