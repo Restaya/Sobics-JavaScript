@@ -15,8 +15,20 @@ let player_height;
 
 let player_current_column;
 
+// Does player have block in his hand
+let has_block;
+
 // Array for the block divs
-let block_array= [];
+let blocks= [];
+
+let block_width;
+let block_height;
+
+// block in player's hand
+let current_block;
+
+let colors = ["blue","orange","yellow","red","pink"];
+
 
 $(document).ready(function(){
 
@@ -33,6 +45,9 @@ $(document).ready(function(){
     game_area_width = game_area.width();
     game_area_height = game_area.height()
 
+    block_width = game_area_width/10;
+    block_height = game_area_height/12;
+
     player.on('load', function () {
         init_player();
     });
@@ -41,6 +56,19 @@ $(document).ready(function(){
 
     game_area.on('mousemove',player_movement);
 
+    game_area.on('click',function () {
+
+        player_current_column = get_player_column();
+        console.log(player_current_column);
+
+        if (!has_block){
+            get_block(player_current_column);
+        }
+        if(has_block){
+            throw_block(player_current_column);
+        }
+    });
+
 });
 
 // Creates player
@@ -48,6 +76,8 @@ function init_player(){
 
     player_width = game_area_width/ 10;
     player_height = game_area_height / 6;
+
+    has_block = false;
 
     console.log(game_area_height)
 
@@ -77,34 +107,50 @@ function player_movement(e){
             left: mouse_pos_x - mouse_pos_x % player_width
         });
     }
+
 }
 
 // Generates random blocks
 function generate_blocks(){
 
-    let block_width = game_area_width/10;
-    let block_height = game_area_height/12;
-
     for(let i = 0 ; i < 5 ; i++){
+        blocks[i] = [];
         for(let j = 0 ; j < 10 ; j++){
 
             let block = $('<div class="block"></div>')
             block.css({
-                width: block_width + 'px',
-                height: block_height + 'px',
-                border: 'solid 1px red',
+                width: block_width - 5 + 'px',
+                height: block_height - 3 + 'px',
+                border: 'solid 1px white',
                 top: i * block_height + 'px',
                 left: j * block_width + 'px',
-                background:'grey',
+                background: colors[Math.floor(Math.random()*colors.length)],
                 position: "absolute"
             })
-            block_array.push(block);
+            blocks[i][j] = block;
             game_area.append(block);
         }
     }
+}
 
+function get_block(position){
+    has_block = true;
+    current_block = blocks[blocks.length - 1][position];
+
+    current_block.animate({
+        top: game_area_height - player_height - block_height + 50  + 'px'
+    },500)
+
+
+}
+
+function throw_block(position){
+    has_block = false;
+}
+
+function get_player_column(){
+    return parseInt(player.css('left')) / player_width;
 }
 
 
 // for player current position, don't put in movement
-// player_current_column = parseInt(player.css('left')) / 100;
