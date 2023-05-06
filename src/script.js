@@ -13,9 +13,6 @@ let player;
 let player_width;
 let player_height;
 
-let player_current_column;
-
-// Does player have block in his hand
 let has_block;
 
 // Array for the block divs
@@ -25,9 +22,9 @@ let block_width;
 let block_height;
 
 // block in player's hand
-let current_block;
+let current_block = null;
 
-let colors = ["blue","orange","yellow","red","pink"];
+let colors = ["#207EE3","#ED6C09","#F0E21F","#990913","#E80E9F"];
 
 
 $(document).ready(function(){
@@ -56,18 +53,7 @@ $(document).ready(function(){
 
     game_area.on('mousemove',player_movement);
 
-    game_area.on('click',function () {
-
-        player_current_column = get_player_column();
-        console.log(player_current_column);
-
-        if (!has_block){
-            get_block(player_current_column);
-        }
-        if(has_block){
-            throw_block(player_current_column);
-        }
-    });
+    app.on('click',player_action);
 
 });
 
@@ -79,16 +65,12 @@ function init_player(){
 
     has_block = false;
 
-    console.log(game_area_height)
-
     player.css({
         height: game_area_height/6 + 'px',
         width: game_area_width/10 + 'px',
         top: game_area_height - player_height + 'px',
         left: game_area_width/2 + 'px'
     })
-
-    console.log(game_area_height - player_height)
 
     console.log("Player initialized successfuly");
 
@@ -108,6 +90,12 @@ function player_movement(e){
         });
     }
 
+    if (has_block === true){
+        current_block.css({
+            left: player.css('left')
+        })
+    }
+
 }
 
 // Generates random blocks
@@ -119,9 +107,10 @@ function generate_blocks(){
 
             let block = $('<div class="block"></div>')
             block.css({
-                width: block_width - 5 + 'px',
-                height: block_height - 3 + 'px',
+                width: block_width + 'px',
+                height: block_height + 'px',
                 border: 'solid 1px white',
+                borderRadius : '10px',
                 top: i * block_height + 'px',
                 left: j * block_width + 'px',
                 background: colors[Math.floor(Math.random()*colors.length)],
@@ -131,26 +120,72 @@ function generate_blocks(){
             game_area.append(block);
         }
     }
+
+    //empty rows
+    for(let i = 5; i < 7 ; i++){
+        blocks[i] = []
+        for(let j  = 0 ; j < 10 ; j++){
+            blocks[i][j] = null;
+        }
+    }
 }
 
-function get_block(position){
-    has_block = true;
-    current_block = blocks[blocks.length - 1][position];
+// Player actions, get a block or throws if has one already
+function player_action(){
 
-    current_block.animate({
-        top: game_area_height - player_height - block_height + 50  + 'px'
-    },500)
+    // Throws a block
+    if(has_block === true){
 
+        let i = 7;
+        while(true){
+            if (blocks[6][get_player_column()] !== null){
+                console.log("No more space to throw!")
+                return;
+            }
+            // Checks for last non-null block in column
+            if (i-1 === -1 || blocks[i-1][get_player_column()] !== null){
+                current_block.animate({
+                    top: i * block_height + 'px'
+                },500)
+                blocks[i][get_player_column()] = current_block;
+                current_block = null;
+                has_block = false;
+                break;
+            }
+            i--;
+        }
+        return;
+    }
 
-}
+    // Gets a block
+    if(has_block === false){
 
-function throw_block(position){
-    has_block = false;
+        let i = 6;
+        while(true){
+
+            if ( i < 0){
+                console.log("No blocks in this column!");
+                break;
+            }
+            if (blocks[i][get_player_column()] !== null){
+                console.log(i);
+                current_block = blocks[i][get_player_column()];
+                //console.log("Got a block at " + (i) + " row!");
+                blocks[i][get_player_column()] = null;
+                has_block = true;
+
+                current_block.animate({
+                    top: game_area_height - player_height - block_height  + 'px'
+                },500)
+
+                break;
+            }
+            i--;
+        }
+    }
 }
 
 function get_player_column(){
     return parseInt(player.css('left')) / player_width;
 }
 
-
-// for player current position, don't put in movement
