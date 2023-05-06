@@ -1,8 +1,8 @@
 let game_area;
-
 let game_area_width;
 let game_area_height;
 
+let app;
 let app_height;
 let app_width;
 
@@ -24,6 +24,17 @@ let block_height;
 // block in player's hand
 let current_block = null;
 
+let score = 0;
+let score_tab;
+
+//time
+let start;
+let max_time;
+let timeoutVal = Math.floor(max_time/100);
+
+// How many times the player threw a block
+let number_of_throws;
+
 let colors = ["#207EE3","#ED6C09","#F0E21F","#990913","#E80E9F"];
 
 
@@ -35,6 +46,13 @@ $(document).ready(function(){
 
     player= $('<img id="player" src="../assets/player.png" alt="null"/> ');
     game_area.append(player);
+
+    score_tab = '<div id="score_tab">Score: <span id="score"></span></div>'
+
+    score_tab = '<div id="score_tab">Score: <span id="score"></span></div>'
+
+    $("body").append(score_tab)
+    $('#score').append(score)
 
     app_height = app.height();
     app_width = app.width();
@@ -50,6 +68,13 @@ $(document).ready(function(){
     });
 
     generate_blocks();
+
+    app.on('click',function () {
+        start = new Date();
+        animate_time_bar();
+        number_of_throws = 0;
+        change_max_time();
+    })
 
     game_area.on('mousemove',player_movement);
 
@@ -150,6 +175,7 @@ function player_action(){
                 blocks[i][get_player_column()] = current_block;
                 current_block = null;
                 has_block = false;
+                update_score(10);
                 break;
             }
             i--;
@@ -189,3 +215,43 @@ function get_player_column(){
     return parseInt(player.css('left')) / player_width;
 }
 
+function update_score(points){
+    $("#score").text(points)
+}
+
+// Animates the time progress bar
+function update_time_bar(percentage){
+    time_bar.css("width", percentage + "%");
+}
+
+// Calculates the percentage for the progress bar
+function animate_time_bar(){
+    let now = new Date();
+    let time_delta = now.getTime() - start.getTime();
+    let percentage = Math.round((time_delta/max_time)*100);
+
+    if(percentage <= 100){
+        update_time_bar(percentage);
+        setTimeout(animate_time_bar, timeoutVal);
+    }
+
+}
+
+// Changes time to go faster based on many blocks have been thrown
+function change_max_time(){
+    if(number_of_throws >= 0){
+        max_time = 15000;
+        return;
+    }
+    if(number_of_throws > 5){
+        max_time = 10000;
+    }
+    if(number_of_throws > 10){
+        max_time = 7500;
+    }
+}
+
+
+function check_blocks(block){
+    //TODO
+}

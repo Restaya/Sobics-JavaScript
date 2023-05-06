@@ -1,21 +1,23 @@
 
 body {
     background: gray;
+    margin: 0;
+    padding: 0;
 }
 
 #app {
-    margin:0 auto;
-    top:15%;
-    left:25%;
     position: absolute;
+    left:18%;
+    top:13%;
     width:1000px;
     height:630px;
     outline:5px groove greenyellow;
+    display:inline-block;
 }
 
 #time_bar{
-    background: white;
-    width:100%;
+    background: red;
+    width:0;
     height:30px;
     position: relative;
 }
@@ -28,7 +30,18 @@ body {
 }
 
 #player{
-    height: 100px;
-    width: 100px;
+    color: mintcream;
     position: relative;
+    left: 0;
+    top: 20px;
+}
+
+#score_tab{
+    position: absolute;
+    width:250px;
+    height:50px;
+    color: green;
+    left: 18%;
+    top: 2%;
+    font-size: 50px;
 }
