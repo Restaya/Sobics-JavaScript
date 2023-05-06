@@ -33,7 +33,7 @@ let max_time;
 let timeoutVal = Math.floor(max_time/100);
 
 // How many times the player threw a block
-let number_of_throws;
+let number_of_throws = 0;
 
 let colors = ["#207EE3","#ED6C09","#F0E21F","#990913","#E80E9F"];
 
@@ -69,11 +69,10 @@ $(document).ready(function(){
 
     generate_blocks();
 
+    start = new Date();
+
     app.on('click',function () {
-        start = new Date();
         animate_time_bar();
-        number_of_throws = 0;
-        change_max_time();
     })
 
     game_area.on('mousemove',player_movement);
@@ -175,12 +174,16 @@ function player_action(){
                 blocks[i][get_player_column()] = current_block;
                 current_block = null;
                 has_block = false;
-                update_score(10);
-                break;
+
+                number_of_throws++;
+
+                update_score(number_of_throws);
+                change_max_time();
+                console.log(max_time)
+                return;
             }
             i--;
         }
-        return;
     }
 
     // Gets a block
@@ -239,15 +242,18 @@ function animate_time_bar(){
 
 // Changes time to go faster based on many blocks have been thrown
 function change_max_time(){
-    if(number_of_throws >= 0){
+    if(number_of_throws >= 0 && number_of_throws <= 5){
+        start = new Date();
         max_time = 15000;
+    }
+    if(number_of_throws > 5 && number_of_throws <= 10){
+        start = new Date();
+        max_time = 10000;
         return;
     }
-    if(number_of_throws > 5){
-        max_time = 10000;
-    }
     if(number_of_throws > 10){
-        max_time = 7500;
+        start = new Date();
+        max_time = 5000;
     }
 }
 

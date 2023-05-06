@@ -45,3 +45,10 @@ body {
     top: 2%;
     font-size: 50px;
 }
+
+
+#music{
+    position: absolute;
+    top: 2%;
+    left:65%;
+}
