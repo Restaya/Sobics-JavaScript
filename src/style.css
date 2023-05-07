@@ -36,7 +36,7 @@ body {
     top: 20px;
 }
 
-#score_tab{
+#score_div{
     position: absolute;
     width:250px;
     height:50px;
@@ -51,4 +51,39 @@ body {
     position: absolute;
     top: 2%;
     left:65%;
+}
+
+#error_div{
+    left: 2%;
+    top: 25%;
+    color: green;
+    position: absolute;
+    font-size: 20px;
+    height:20px;
+}
+
+#throws_div{
+    left: 1%;
+    top: 70%;
+    color: green;
+    position: absolute;
+    font-size: 30px;
+    height: 30px;
+}
+
+#name_form{
+
+    top: 35%;
+    left: 40%;
+    position: absolute;
+}
+
+#high_scores_div{
+    top: 25%;
+    left:70%;
+    width:300px;
+    height:150px;
+    position:absolute;
+    font-size: 30px;
+    color:green;
 }
