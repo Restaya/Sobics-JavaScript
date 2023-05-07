@@ -466,7 +466,6 @@ function generate_row(){
                     background: colors[Math.floor(Math.random()*colors.length)],
                     position: "absolute"
                 })
-                console.log("Generated block in " + i + " row, " + j + " column");
                 blocks[i][j] = block;
                 game_area.append(block);
                 counter++;
