@@ -144,7 +144,6 @@ function player_movement(e){
             left: player.css('left')
         })
     }
-
 }
 
 // Generates random blocks
@@ -182,10 +181,6 @@ function generate_blocks(){
 // Player actions, get a block or throws if it has one already
 function player_action(){
 
-    if(number_of_throws === 16){
-        game_end();
-    }
-
     // Throws a block
     if(has_block === true){
 
@@ -200,23 +195,27 @@ function player_action(){
                 blocks[i][get_player_column()] = current_block;
                 current_block.animate({
                     top: i * block_height + 'px'
-                },500)
+                },250)
 
                 has_block = false;
-
                 number_of_throws++;
+
+                find_blocks(blocks[i][get_player_column()],i,get_player_column());
+                current_block = null;
+
                 $('#throws').text(number_of_throws);
 
                 pop_sound.play();
                 $('#message').text("");
 
                 change_max_time();
+                if(number_of_throws === 15){
+                    game_end();
+                }
                 break;
             }
             i--;
         }
-        find_blocks(blocks[i][get_player_column()],i,get_player_column());
-        current_block = null;
         return;
     }
 
@@ -238,7 +237,7 @@ function player_action(){
                 whoosh_sound.play();
                 current_block.animate({
                     top: game_area_height - player_height - block_height  + 'px'
-                },500)
+                },250)
 
                 $('#message').text("");
 
@@ -302,6 +301,11 @@ function game_end(){
     score_div.css({
         top: 25+ '%',
         left: 40 + '%'
+    })
+    error_div.css({
+        top: 50 + "%",
+        left: 40 + "%",
+        fontsize: 50 + "px"
     })
     name_form =  $('<div id="name_form">' +
         '<form>' +
@@ -406,7 +410,6 @@ function find_blocks(block,row,column){
         found_right = true;
     }
 
-
     if(matched){
         blocks[row][column].remove();
         blocks[row][column] = null;
@@ -425,18 +428,54 @@ function find_blocks(block,row,column){
         blocks[row][column+1] = null;
     }
 
-    if(count > 1){
-        if(percentage <= 100){
+    if(count > 1) {
+        if (percentage <= 100) {
             score += 200 * count;
-        }
-        else{
+        } else {
             score += 100 * count;
         }
         update_score(score);
     }
 
+    if(number_of_throws % 3 === 0 && number_of_throws > 0){
+        generate_row();
+    }
 }
 
-function is_place_empty_space(){
-    //TODO if there's no space left end game
+function generate_row(){
+
+    let j = 0;
+    let counter = 0;
+    while(true){
+        if(j === 10){
+            break;
+        }
+        for(let i = 0 ; i < 7 ; i++){
+            if(blocks[6][j] !== null){
+                break;
+            }
+            if(blocks[i][j] === null){
+                let block = $('<div class="block"></div>')
+                block.css({
+                    width: block_width + 'px',
+                    height: block_height + 'px',
+                    border: 'solid 1px white',
+                    borderRadius : '10px',
+                    top: i * block_height + 'px',
+                    left: j * block_width + 'px',
+                    background: colors[Math.floor(Math.random()*colors.length)],
+                    position: "absolute"
+                })
+                console.log("Generated block in " + i + " row, " + j + " column");
+                blocks[i][j] = block;
+                game_area.append(block);
+                counter++;
+                break;
+            }
+        }
+        j++;
+    }
+    if(counter === 0){
+        game_end();
+    }
 }
