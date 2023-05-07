@@ -25,7 +25,7 @@ let block_height;
 // block in player's hand
 let current_block = null;
 
-let score = 10;
+let score = 0;
 let score_div;
 
 let error_div;
@@ -34,6 +34,7 @@ let error_message;
 let start;
 let max_time;
 let timeoutVal = Math.floor(max_time/100);
+let percentage;
 
 // How many times the player threw a block
 let number_of_throws = 0;
@@ -122,8 +123,6 @@ function init_player(){
         left: game_area_width/2 + 'px'
     })
 
-    console.log("Player initialized successfuly");
-
 }
 
 // Mouse movement for the player
@@ -173,17 +172,17 @@ function generate_blocks(){
 
     //empty rows
     for(let i = 5; i < 7 ; i++){
-        blocks[i] = []
-        for(let j  = 0 ; j < 10 ; j++){
+        blocks[i] =[]
+        for(let j = 0 ; j < 10 ; j++){
             blocks[i][j] = null;
         }
     }
 }
 
-// Player actions, get a block or throws if has one already
+// Player actions, get a block or throws if it has one already
 function player_action(){
 
-    if(number_of_throws === 5){
+    if(number_of_throws === 16){
         game_end();
     }
 
@@ -194,29 +193,31 @@ function player_action(){
         while(true){
             if (blocks[6][get_player_column()] !== null){
                 $('#message').text("No more space to throw!");
-                return;
+                break;
             }
             // Checks for last non-null block in column
             if (i-1 === -1 || blocks[i-1][get_player_column()] !== null){
+                blocks[i][get_player_column()] = current_block;
                 current_block.animate({
                     top: i * block_height + 'px'
                 },500)
-                blocks[i][get_player_column()] = current_block;
-                current_block = null;
+
                 has_block = false;
 
                 number_of_throws++;
                 $('#throws').text(number_of_throws);
 
                 pop_sound.play();
-
                 $('#message').text("");
-                update_score(number_of_throws);
+
                 change_max_time();
-                return;
+                break;
             }
             i--;
         }
+        find_blocks(blocks[i][get_player_column()],i,get_player_column());
+        current_block = null;
+        return;
     }
 
     // Gets a block
@@ -265,7 +266,7 @@ function update_time_bar(percentage){
 function animate_time_bar(){
     let now = new Date();
     let time_delta = now.getTime() - start.getTime();
-    let percentage = Math.round((time_delta/max_time)*100);
+    percentage = Math.round((time_delta/max_time)*100);
 
     if(percentage <= 100){
         update_time_bar(percentage);
@@ -278,19 +279,20 @@ function animate_time_bar(){
 function change_max_time(){
     if(number_of_throws >= 0 && number_of_throws <= 5){
         start = new Date();
-        max_time = 15000;
+        max_time = 8000;
     }
     if(number_of_throws > 5 && number_of_throws <= 10){
         start = new Date();
-        max_time = 10000;
+        max_time = 5000;
         return;
     }
     if(number_of_throws > 10){
         start = new Date();
-        max_time = 5000;
+        max_time = 3000;
     }
 }
 
+// Removes the game from the screen and shows the top list
 function game_end(){
     app.remove();
     throws_div.remove();
@@ -309,9 +311,6 @@ function game_end(){
         '</div>')
 
     body.append(name_form);
-}
-function check_blocks(block){
-    //TODO
 }
 
 // Saves the score and lists the high scores when the button is clicked
@@ -376,4 +375,68 @@ function list_high_scores(){
 
     body.append(high_scores_div);
 
+}
+
+// When a block was thrown checks the nearby blocks color and destroys them if it's the same color
+function find_blocks(block,row,column){
+
+    let count = 0;
+    let matched = false;
+
+    let found_above = false;
+    let found_left = false;
+    let found_right = false;
+
+    // above block
+    if( row-1 !== -1 && blocks[row-1][column] !== null && block.css('background-color') === blocks[row-1][column].css('background-color')){
+       count++;
+       matched = true;
+       found_above = true;
+    }
+    // left side block
+    if( column-1 !== -1 && blocks[row][column-1] !== null && block.css('background-color') === blocks[row][column-1].css('background-color')){
+        count++;
+        matched = true;
+        found_left = true;
+    }
+    // right side block
+    if( column+1 !== 10 && blocks[row][column+1] !== null && block.css('background-color') === blocks[row][column+1].css('background-color')){
+        count++;
+        matched = true
+        found_right = true;
+    }
+
+
+    if(matched){
+        blocks[row][column].remove();
+        blocks[row][column] = null;
+        count++;
+    }
+    if(found_above){
+        blocks[row - 1][column].remove();
+        blocks[row - 1][column] = null;
+    }
+    if(found_left){
+        blocks[row][column-1].remove();
+        blocks[row][column-1] = null;
+    }
+    if(found_right){
+        blocks[row][column+1].remove();
+        blocks[row][column+1] = null;
+    }
+
+    if(count > 1){
+        if(percentage <= 100){
+            score += 200 * count;
+        }
+        else{
+            score += 100 * count;
+        }
+        update_score(score);
+    }
+
+}
+
+function is_place_empty_space(){
+    //TODO if there's no space left end game
 }
