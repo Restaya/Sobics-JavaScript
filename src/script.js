@@ -365,7 +365,7 @@ function list_high_scores(){
     if(high_scores[2] != null){
         third_row = high_scores[2].name + ": " + high_scores[2].high_score;
     }else{
-        second_row="No third place yet";
+        third_row="No third place yet";
     }
 
 
