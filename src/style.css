@@ -1,6 +1,6 @@
 
 body {
-    background: gray;
+    background: #b89a2e;
     margin: 0;
     padding: 0;
 }
@@ -17,6 +17,8 @@ body {
 
 #time_bar{
     background: red;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
     width:0;
     height:30px;
     position: relative;
@@ -37,9 +39,8 @@ body {
 }
 
 #score_div{
-    position: absolute;
+    position: relative;
     width:250px;
-    height:50px;
     color: green;
     left: 18%;
     top: 2%;
@@ -63,11 +64,12 @@ body {
 }
 
 #throws_div{
-    left: 1%;
-    top: 70%;
+    left: 53%;
+    top: -60px;
+    width: 500px;
     color: green;
-    position: absolute;
-    font-size: 30px;
+    position: relative;
+    font-size: 50px;
     height: 30px;
 }
 

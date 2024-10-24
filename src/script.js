@@ -67,28 +67,30 @@ $(document).ready(function(){
     body.append(score_div)
     $('#score').append(score)
 
-    error_div = $('<div id="error_div"><span id="message"></span></div>')
-    body.append(error_div);
-    $('#message').append(error_message);
-
     throws_div = $('<div id="throws_div">Thrown blocks: <span id="throws"></span></div>');
     body.append(throws_div)
     $('#throws').append(number_of_throws)
+
+    error_div = $('<div id="error_div"><span id="message"></span></div>')
+    body.append(error_div);
+    $('#message').append(error_message);
 
     app_height = app.height();
     app_width = app.width();
 
     game_area_width = game_area.width();
-    game_area_height = game_area.height()
+    game_area_height = game_area.height();
 
     block_width = game_area_width/10;
     block_height = game_area_height/12;
 
     pop_sound = document.createElement('audio');
     pop_sound.setAttribute('src','../assets/pop_sound.wav');
+    pop_sound.volume = 0.25;
 
     whoosh_sound = document.createElement('audio');
     whoosh_sound.setAttribute('src','../assets/whoosh_sound.wav')
+    whoosh_sound.volume = 0.25;
 
     player.on('load', function () {
         init_player();
@@ -185,6 +187,7 @@ function player_action(){
     if(has_block === true){
 
         let i = 7;
+        let count = 0;
         while(true){
             if (blocks[6][get_player_column()] !== null){
                 $('#message').text("No more space to throw!");
@@ -192,17 +195,30 @@ function player_action(){
             }
             // Checks for last non-null block in column
             if (i-1 === -1 || blocks[i-1][get_player_column()] !== null){
+                
                 blocks[i][get_player_column()] = current_block;
                 current_block.animate({
                     top: i * block_height + 'px'
-                },250)
-
+                },0)
+                
                 has_block = false;
                 number_of_throws++;
 
-                find_blocks(blocks[i][get_player_column()],i,get_player_column());
+                count = find_blocks(blocks[i][get_player_column()]);
                 current_block = null;
-
+        
+                if(count > 1) {
+                    if (percentage <= 100) {
+                        score += 200 * count;
+                    } else {
+                        score += 100 * count;
+                    }
+                    update_score(score);
+            
+                }
+                if(number_of_throws % 3 === 0 && number_of_throws > 0){
+                    generate_row();
+                }
                 $('#throws').text(number_of_throws);
 
                 pop_sound.play();
@@ -216,6 +232,23 @@ function player_action(){
             }
             i--;
         }
+        
+        //Fils the holes betweeen blocks
+        if(count > 1){
+           if(count > 7){
+                for (let i = 0; i < 7;i++){
+                    fill_holes();
+                } 
+           }else{
+            for(let i = 0; i < count; i++){
+                fill_holes();
+            }
+           }
+        }
+        
+        // Prints blocks position for debugging
+        //console.log(blocks);
+
         return;
     }
 
@@ -295,8 +328,6 @@ function change_max_time(){
 function game_end(){
     app.remove();
     throws_div.remove();
-    $('#music').remove();
-
 
     score_div.css({
         top: 25+ '%',
@@ -381,65 +412,60 @@ function list_high_scores(){
 
 }
 
-// When a block was thrown checks the nearby blocks color and destroys them if it's the same color
-function find_blocks(block,row,column){
+// When a block was thrown checks the nearby blocks color and removes them if their color matches
+function find_blocks(block){
 
-    let count = 0;
+    let open_blocks = []
+    //let closed_blocks = []
+    let block_candidate;
+    let color;
+    let found = 0;
+
+    // for one block
     let matched = false;
 
-    let found_above = false;
-    let found_left = false;
-    let found_right = false;
+    open_blocks.push(block);
+    //closed_blocks.push(block);
 
-    // above block
-    if( row-1 !== -1 && blocks[row-1][column] !== null && block.css('background-color') === blocks[row-1][column].css('background-color')){
-       count++;
-       matched = true;
-       found_above = true;
-    }
-    // left side block
-    if( column-1 !== -1 && blocks[row][column-1] !== null && block.css('background-color') === blocks[row][column-1].css('background-color')){
-        count++;
-        matched = true;
-        found_left = true;
-    }
-    // right side block
-    if( column+1 !== 10 && blocks[row][column+1] !== null && block.css('background-color') === blocks[row][column+1].css('background-color')){
-        count++;
-        matched = true
-        found_right = true;
-    }
+    while(open_blocks.length){
 
-    if(matched){
-        blocks[row][column].remove();
-        blocks[row][column] = null;
-        count++;
-    }
-    if(found_above){
-        blocks[row - 1][column].remove();
-        blocks[row - 1][column] = null;
-    }
-    if(found_left){
-        blocks[row][column-1].remove();
-        blocks[row][column-1] = null;
-    }
-    if(found_right){
-        blocks[row][column+1].remove();
-        blocks[row][column+1] = null;
-    }
+        block_candidate = open_blocks.shift();
+        found++;
 
-    if(count > 1) {
-        if (percentage <= 100) {
-            score += 200 * count;
-        } else {
-            score += 100 * count;
+        color = block_candidate.css('background-color');
+        row = parseInt(block_candidate.css('top'), 10)/50;
+        column = parseInt(block_candidate.css('left'), 10)/100;
+
+        // above block
+        if( row-1 !== -1 && blocks[row-1][column] !== null && color === blocks[row-1][column].css('background-color')){
+            open_blocks.push(blocks[row-1][column]);
+            matched = true;
         }
-        update_score(score);
+        // below block
+        if( row+1 !== 7 && blocks[row+1][column] !== null && color === blocks[row+1][column].css('background-color')){
+            open_blocks.push(blocks[row+1][column]);
+            matched = true;
+        }
+        // left side block
+        if( column-1 !== -1 && blocks[row][column-1] !== null && color === blocks[row][column-1].css('background-color')){
+            open_blocks.push(blocks[row][column-1]);
+            matched = true;
+        }
+        // right side block
+        if( column+1 !== 10 && blocks[row][column+1] !== null && color === blocks[row][column+1].css('background-color')){
+            open_blocks.push(blocks[row][column+1]);
+            matched = true;
+        }
+
+        if(matched && blocks[row][column] !== null){
+            // Removes the current block candidate
+            blocks[row][column].remove();
+            blocks[row][column] = null;
+        }
+        
     }
 
-    if(number_of_throws % 3 === 0 && number_of_throws > 0){
-        generate_row();
-    }
+    return found;
 }
 
 function generate_row(){
@@ -476,5 +502,22 @@ function generate_row(){
     }
     if(counter === 0){
         game_end();
+    }
+}
+
+// If there is a hole above a block, it slides the block back
+function fill_holes(){
+
+    for(let i = 0; i < 6; i++){
+        for(let j = 0; j < 10; j++){
+            if(blocks[i][j] === null && blocks[i+1][j] !== null){
+                temp_block = blocks[i+1][j];
+                blocks[i][j] = temp_block;
+                temp_block.animate({
+                    top: i * block_height + 'px'
+                },100)
+                blocks[i+1][j] = null;
+            }
+        }
     }
 }
