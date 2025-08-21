@@ -7,6 +7,8 @@ If the thrown blocks color matches the surrounding block's color, they're remove
 Every 3rd throw a new row of blocks is generated with random colors.
 At the 15th throw the game ends.
 
-If you throw the block before the time bar is fulled, you gain more points.
+Throw the block before the red time bar is full, you gain more points.
 
-To launch the game, open the index.html file, or drag it into your broswer.
+To launch the game, download the ZIP file, extract it to a folder, then open the index.html file, or drag it into your broswer.
+
+<img width="700" height="350" alt="sobics" src="https://github.com/user-attachments/assets/a91d442a-f48f-4cc7-804f-794c9a2993ef" />
